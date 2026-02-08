@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
-import Link from 'next/link'
+import { PostCard } from '@/components/posts/PostCard'
+import type { PostCardData } from '@/types/post'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,39 +30,11 @@ export default async function FeedPage() {
       <div className='space-y-4'>
         {posts.length === 0 ? (
           <div className='rounded-lg border p-6 text-sm text-muted-foreground'>
-            No posts yet. Seed data should create a few. Check your seed.
+            No posts yet.
           </div>
         ) : (
-          posts.map((post) => (
-            <article key={post.id} className='rounded-lg border p-4'>
-              <div className='flex items-baseline justify-between gap-4'>
-                <div className='min-w-0'>
-                  <Link href={`/profile/${post.author.username}`}>
-                    {post.author.displayName ?? post.author.username}
-                  </Link>
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    @{post.author.username}
-                  </span>
-                </div>
-
-                <time dateTime={post.createdAt.toISOString()}>
-                  {new Intl.DateTimeFormat('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  }).format(post.createdAt)}
-                </time>
-              </div>
-
-              <p className='mt-3 whitespace-pre-wrap text-sm leading-6'>
-                {post.content}
-              </p>
-
-              <footer className='mt-4 flex gap-4 text-xs text-muted-foreground'>
-                <span>{post._count.likes} likes</span>
-                <span>{post._count.comments} comments</span>
-              </footer>
-            </article>
+          (posts as unknown as PostCardData[]).map((post) => (
+            <PostCard key={post.id} post={post} />
           ))
         )}
       </div>
