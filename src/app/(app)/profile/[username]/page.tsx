@@ -2,15 +2,17 @@ import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { PostCardData } from '@/types/post'
+import { getInitials } from '@/lib/text/getInitials'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>
-}) {
+type ProfileParams = { username: string }
+
+type ProfilePageProps = { params: Promise<ProfileParams> }
+
+export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params
   if (!username) notFound()
 
@@ -39,6 +41,9 @@ export default async function ProfilePage({
 
   if (!user) notFound()
 
+  const profileName = user.displayName ?? user.username
+  const initials = getInitials(profileName)
+
   return (
     <div className='space-y-6'>
       <header className='rounded-lg border p-4'>
@@ -56,7 +61,10 @@ export default async function ProfilePage({
             )}
           </div>
 
-          <div className='h-12 w-12 shrink-0 rounded-full border' />
+          <Avatar className='h-12 w-12 shrink-0'>
+            <AvatarImage src={user.imageUrl ?? undefined} alt={profileName} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
         </div>
 
         <div className='mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground'>
