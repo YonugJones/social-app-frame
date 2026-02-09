@@ -1,3 +1,5 @@
+// Purpose: Create a single Prisma client instance that can query Postgres.
+
 import { PrismaClient } from '@/app/generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 

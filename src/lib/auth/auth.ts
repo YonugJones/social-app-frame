@@ -1,3 +1,10 @@
+/*
+Purpose: Configure Better Auth with:
+	•	how to store users/sessions (database adapter)
+	•	which auth methods are enabled
+	•	Next integration for cookies
+*/
+
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
