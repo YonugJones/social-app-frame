@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { PostCardData } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
+import { formatDate } from '@/lib/date/formatDate'
 
 type PostCardProps = {
   post: PostCardData
@@ -42,11 +43,7 @@ export function PostCard({ post }: PostCardProps) {
             className='shrink-0 text-xs text-muted-foreground'
             dateTime={post.createdAt.toISOString()}
           >
-            {new Intl.DateTimeFormat('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            }).format(post.createdAt)}
+            {formatDate(post.createdAt)}
           </time>
         </div>
       </CardHeader>
