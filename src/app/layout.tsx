@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
+import { AppNav } from '@/components/nav/AppNav'
 // import { Geist, Geist_Mono } from 'next/font/google'
-import { SiteHeader } from '@/components/layout/SiteHeader'
 import '@/app/globals.css'
 
 // const geistSans = Geist({
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className='min-h-screen bg-background text-foreground'>
-        <SiteHeader />
+        <AppNav />
         <main className='mx-auto max-w-5xl px-4 py-8'>{children}</main>
       </body>
     </html>
