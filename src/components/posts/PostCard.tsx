@@ -10,7 +10,13 @@ type PostCardProps = {
 }
 
 export function PostCard({ post }: PostCardProps) {
-  const authorName = post.author.displayName ?? post.author.username
+  const authorName =
+    post.author.displayName ?? post.author.username ?? post.author.id
+
+  const profileHref = post.author.username
+    ? `/profile/${post.author.username}`
+    : '/onboarding/username'
+
   const initials = getInitials(authorName)
 
   return (
@@ -20,22 +26,22 @@ export function PostCard({ post }: PostCardProps) {
           <div className='flex min-w-0 items-center gap-3'>
             <Avatar className='h-9 w-9 shrink-0'>
               <AvatarImage
-                src={post.author.imageUrl ?? undefined}
+                src={post.author.image ?? undefined}
                 alt={authorName}
               />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
 
             <div className='min-w-0'>
-              <Link
-                href={`/profile/${post.author.username}`}
-                className='font-medium hover:underline'
-              >
+              <Link href={profileHref} className='font-medium hover:underline'>
                 {authorName}
               </Link>
-              <span className='ml-2 text-sm text-muted-foreground'>
-                @{post.author.username}
-              </span>
+
+              {post.author.username && (
+                <span className='ml-2 text-sm text-muted-foreground'>
+                  @{post.author.username}
+                </span>
+              )}
             </div>
           </div>
 

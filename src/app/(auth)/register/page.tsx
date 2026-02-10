@@ -29,7 +29,7 @@ export default function RegisterPage() {
     setError(null)
   }, [name, email, password])
 
-  async function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)

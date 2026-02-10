@@ -14,29 +14,24 @@ datasource db {
 }
 
 model User {
-  id String @id @default(cuid())
-
-  username    String? @unique
-  displayName String?
-  bio         String?
-  imageUrl    String?
-
+  id            String   @id @default(cuid())
   name          String
-  email         String  @unique
-  emailVerified Boolean @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  username      String?  @unique
+  displayName   String?
+  bio           String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   posts     Post[]
   comments  Comment[]
   likes     Like[]
   following Follow[]  @relation("Following")
   followers Follow[]  @relation("Followers")
-
-  sessions Session[]
-  accounts Account[]
+  sessions  Session[]
+  accounts  Account[]
 
   @@index([username])
 }
@@ -89,14 +84,15 @@ model Verification {
 }
 
 model Post {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   authorId  String
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  comments  Comment[]
-  likes     Like[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[]
+  likes    Like[]
 
   @@index([authorId, createdAt])
 }

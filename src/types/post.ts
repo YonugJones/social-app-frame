@@ -1,7 +1,8 @@
 export type PostCardAuthor = {
-  username: string
+  id: string
+  image: string | null
+  username: string | null
   displayName: string | null
-  imageUrl: string | null
 }
 
 export type PostCardCounts = {

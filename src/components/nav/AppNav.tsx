@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import prisma from '@/lib/prisma'
 import { getServerSession } from '@/lib/auth/session'
 import { Globe } from 'lucide-react'
 import {
@@ -16,10 +17,24 @@ import { getInitials } from '@/lib/text/getInitials'
 
 export async function AppNav() {
   const data = await getServerSession()
-  const user = data?.user ?? null
+  const authUser = data?.user ?? null
 
-  // Temp fallback until username onboarding exists
-  const profileHref = `/profile/${user?.name ?? 'YoungJones'}`
+  const appUser = authUser
+    ? await prisma.user.findUnique({
+        where: { id: authUser.id },
+        select: {
+          username: true,
+          displayName: true,
+          image: true,
+          email: true,
+          name: true,
+        },
+      })
+    : null
+
+  const profileHref = appUser?.username
+    ? `/profile/${appUser.username}`
+    : '/onboarding/username'
 
   return (
     <header className='border-b'>
@@ -33,7 +48,7 @@ export async function AppNav() {
         </Link>
 
         <nav className='flex items-center gap-2'>
-          {user ? (
+          {authUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -43,9 +58,9 @@ export async function AppNav() {
                 >
                   <Avatar className='h-8 w-8'>
                     {/* use image if you have it */}
-                    <AvatarImage src={user.image ?? undefined} />
+                    <AvatarImage src={authUser.image ?? undefined} />
                     <AvatarFallback className='bg-primary text-primary-foreground'>
-                      {getInitials(user.name ?? user.email)}
+                      {getInitials(authUser.name ?? authUser.email)}
                     </AvatarFallback>
                   </Avatar>
                 </button>
@@ -61,10 +76,10 @@ export async function AppNav() {
                     <Link href={profileHref} className='w-full'>
                       <div className='flex min-w-0 flex-col'>
                         <p className='truncate text-sm font-medium leading-none'>
-                          {user.name}
+                          {appUser?.displayName ?? authUser.name}
                         </p>
                         <p className='truncate text-xs text-muted-foreground'>
-                          {user.email}
+                          {authUser.email}
                         </p>
                       </div>
                     </Link>

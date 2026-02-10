@@ -14,15 +14,15 @@ type ProfilePageProps = { params: Promise<ProfileParams> }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params
-  if (!username) notFound()
 
   const user = await prisma.user.findUnique({
     where: { username },
     select: {
+      id: true,
+      image: true,
       username: true,
       displayName: true,
       bio: true,
-      imageUrl: true,
       _count: {
         select: { posts: true, followers: true, following: true },
       },
@@ -31,7 +31,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         take: 20,
         include: {
           author: {
-            select: { username: true, displayName: true, imageUrl: true },
+            select: {
+              id: true,
+              image: true,
+              username: true,
+              displayName: true,
+            },
           },
           _count: { select: { comments: true, likes: true } },
         },
@@ -41,7 +46,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   if (!user) notFound()
 
-  const profileName = user.displayName ?? user.username
+  const profileName = user.displayName ?? user.username ?? user.id
   const initials = getInitials(profileName)
 
   return (
@@ -50,10 +55,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <div className='flex items-start justify-between gap-6'>
           <div className='min-w-0 space-y-1'>
             <h1 className='truncate text-2xl font-semibold tracking-tight'>
-              {user.displayName ?? user.username}
+              {user.displayName ?? user.username ?? user.id}
             </h1>
-            <p className='text-sm text-muted-foreground'>@{user.username}</p>
-
+            {user.username && (
+              <p className='text-sm text-muted-foreground'>@{user.username}</p>
+            )}
             {user.bio ? (
               <p className='pt-2 text-sm leading-6'>{user.bio}</p>
             ) : (
@@ -62,7 +68,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
 
           <Avatar className='h-12 w-12 shrink-0'>
-            <AvatarImage src={user.imageUrl ?? undefined} alt={profileName} />
+            <AvatarImage src={user.image ?? undefined} alt={profileName} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </div>
