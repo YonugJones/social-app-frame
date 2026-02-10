@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth/client'
@@ -25,7 +25,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    setError(null)
+  }, [name, email, password])
+
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)
