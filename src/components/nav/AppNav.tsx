@@ -48,7 +48,7 @@ export async function AppNav() {
         </Link>
 
         <nav className='flex items-center gap-2'>
-          {authUser ? (
+          {appUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -58,9 +58,13 @@ export async function AppNav() {
                 >
                   <Avatar className='h-8 w-8'>
                     {/* use image if you have it */}
-                    <AvatarImage src={authUser.image ?? undefined} />
+                    <AvatarImage src={appUser.image ?? undefined} />
                     <AvatarFallback className='bg-primary text-primary-foreground'>
-                      {getInitials(authUser.name ?? authUser.email)}
+                      {getInitials(
+                        appUser.displayName ??
+                          appUser.username ??
+                          appUser.email,
+                      )}
                     </AvatarFallback>
                   </Avatar>
                 </button>
@@ -76,11 +80,15 @@ export async function AppNav() {
                     <Link href={profileHref} className='w-full'>
                       <div className='flex min-w-0 flex-col'>
                         <p className='truncate text-sm font-medium leading-none'>
-                          {appUser?.displayName ?? authUser.name}
+                          {appUser?.displayName ??
+                            appUser.username ??
+                            appUser.email}
                         </p>
-                        <p className='truncate text-xs text-muted-foreground'>
-                          {authUser.email}
-                        </p>
+                        {appUser.displayName && (
+                          <p className='truncate text-xs text-muted-foreground'>
+                            {appUser.email}
+                          </p>
+                        )}
                       </div>
                     </Link>
                   </DropdownMenuItem>

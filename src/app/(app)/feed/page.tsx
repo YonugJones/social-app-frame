@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { getServerSession } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 import { PostCard } from '@/components/posts/PostCard'
 import type { PostCardData } from '@/types/post'
@@ -5,6 +7,18 @@ import type { PostCardData } from '@/types/post'
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
+  const data = await getServerSession()
+  const authUser = data?.user
+
+  if (!authUser) redirect('/login')
+
+  const me = await prisma.user.findUnique({
+    where: { id: authUser.id },
+    select: { username: true },
+  })
+
+  if (!me?.username) redirect('/onboarding/username')
+
   const posts = await prisma.post.findMany({
     take: 20,
     orderBy: { createdAt: 'desc' },
