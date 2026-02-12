@@ -3,7 +3,7 @@ import { getServerSession } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 import { CreatePostForm } from '@/components/posts/CreatePostForm'
 import { PostCard } from '@/components/posts/PostCard'
-import type { PostCardData } from '@/types/post'
+import { postCardSelect } from '@/types/post'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,14 +23,7 @@ export default async function FeedPage() {
   const posts = await prisma.post.findMany({
     take: 20,
     orderBy: { createdAt: 'desc' },
-    include: {
-      author: {
-        select: { id: true, image: true, username: true, displayName: true },
-      },
-      _count: {
-        select: { comments: true, likes: true },
-      },
-    },
+    select: postCardSelect,
   })
 
   return (
@@ -50,9 +43,7 @@ export default async function FeedPage() {
             No posts yet.
           </div>
         ) : (
-          (posts as unknown as PostCardData[]).map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
+          posts.map((post) => <PostCard key={post.id} post={post} />)
         )}
       </div>
     </div>

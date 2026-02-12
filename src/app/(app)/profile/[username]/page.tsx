@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import type { PostCardData } from '@/types/post'
+import { postCardSelect } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 
 export const dynamic = 'force-dynamic'
@@ -29,17 +29,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       posts: {
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          author: {
-            select: {
-              id: true,
-              image: true,
-              username: true,
-              displayName: true,
-            },
-          },
-          _count: { select: { comments: true, likes: true } },
-        },
+        select: postCardSelect,
       },
     },
   })
@@ -112,7 +102,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
         ) : (
           <div className='space-y-4'>
-            {(user.posts as unknown as PostCardData[]).map((post) => (
+            {user.posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
