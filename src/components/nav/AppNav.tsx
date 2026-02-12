@@ -48,7 +48,8 @@ export async function AppNav() {
         </Link>
 
         <nav className='flex items-center gap-2'>
-          {appUser ? (
+          {appUser && authUser ? (
+            // Logged in Profile Avatar
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -116,6 +117,7 @@ export async function AppNav() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
+            // Non logged in Register/Login buttons
             <>
               <Button asChild variant='ghost' size='sm'>
                 <Link href='/login'>Sign in</Link>

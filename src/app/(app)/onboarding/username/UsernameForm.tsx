@@ -18,7 +18,6 @@ import { Label } from '@/components/ui/label'
 type ActionState =
   | { ok: true }
   | { ok: false; error: string; field?: 'username' | 'displayName' }
-  | null
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -34,7 +33,7 @@ export function UsernameForm({
 }: {
   defaultDisplayName?: string
 }) {
-  const [state, formAction] = useActionState<ActionState, FormData>(
+  const [state, formAction] = useActionState<ActionState | null, FormData>(
     claimUsername,
     null,
   )

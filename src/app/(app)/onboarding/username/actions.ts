@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation'
 type ActionState =
   | { ok: true }
   | { ok: false; error: string; field?: 'username' | 'displayName' }
-  | null
 
 function normalizeUsername(input: string) {
   return input.trim().toLowerCase()
@@ -18,7 +17,7 @@ function isValidUsername(username: string) {
 }
 
 export async function claimUsername(
-  _prevState: ActionState,
+  _prevState: ActionState | null,
   formData: FormData,
 ): Promise<ActionState> {
   const sessionData = await getServerSession()

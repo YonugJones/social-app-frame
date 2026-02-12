@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
+import { CreatePostForm } from '@/components/posts/CreatePostForm'
 import { PostCard } from '@/components/posts/PostCard'
 import type { PostCardData } from '@/types/post'
 
@@ -40,6 +41,8 @@ export default async function FeedPage() {
           Latest posts from the community
         </p>
       </header>
+
+      <CreatePostForm />
 
       <div className='space-y-4'>
         {posts.length === 0 ? (
