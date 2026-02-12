@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { profileHeaderSelect } from '@/types/user'
 import { postCardSelect } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 
@@ -18,14 +19,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const user = await prisma.user.findUnique({
     where: { username },
     select: {
-      id: true,
-      image: true,
-      username: true,
-      displayName: true,
-      bio: true,
-      _count: {
-        select: { posts: true, followers: true, following: true },
-      },
+      ...profileHeaderSelect,
       posts: {
         orderBy: { createdAt: 'desc' },
         take: 20,
