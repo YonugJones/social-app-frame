@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { PostCardData } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 import { formatDate } from '@/lib/date/formatDate'
-import { LikeButton } from '@/app/(app)/posts/LikeButton'
+import { LikeButton } from '@/components/posts/LikeButton'
 
 type PostCardProps = {
   post: PostCardData
