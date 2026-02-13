@@ -3,13 +3,13 @@ import { getServerSession } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 import { CreatePostForm } from '@/components/posts/CreatePostForm'
 import { PostCard } from '@/components/posts/PostCard'
-import { postCardSelect } from '@/types/post'
+import { makePostCardSelect } from '@/types/post'
 
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
-  const data = await getServerSession()
-  const authUser = data?.user
+  const session = await getServerSession()
+  const authUser = session?.user
 
   if (!authUser) redirect('/login')
 
@@ -20,10 +20,12 @@ export default async function FeedPage() {
 
   if (!me?.username) redirect('/onboarding/username')
 
+  const viewerId = authUser.id
+
   const posts = await prisma.post.findMany({
     take: 20,
     orderBy: { createdAt: 'desc' },
-    select: postCardSelect,
+    select: makePostCardSelect(viewerId),
   })
 
   return (

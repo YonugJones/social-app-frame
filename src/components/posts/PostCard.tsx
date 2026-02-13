@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { PostCardData } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 import { formatDate } from '@/lib/date/formatDate'
+import { LikeButton } from '@/app/(app)/posts/LikeButton'
 
 type PostCardProps = {
   post: PostCardData
@@ -18,6 +19,8 @@ export function PostCard({ post }: PostCardProps) {
     : '/onboarding/username'
 
   const initials = getInitials(authorName)
+
+  const likedByMe = post.likes.length > 0
 
   return (
     <Card>
@@ -58,9 +61,13 @@ export function PostCard({ post }: PostCardProps) {
         <p className='whitespace-pre-wrap text-sm leading-6'>{post.content}</p>
       </CardContent>
 
-      <CardFooter className='gap-4 text-xs text-muted-foreground'>
-        <span>{post._count.likes} likes</span>
-        <span>{post._count.comments} comments</span>
+      <CardFooter className='flex items-center justify-between text-xs text-muted-foreground'>
+        <div className='flex gap-4'>
+          <span>{post._count.likes} likes</span>
+          <span>{post._count.comments} comments</span>
+        </div>
+
+        <LikeButton postId={post.id} liked={likedByMe} />
       </CardFooter>
     </Card>
   )

@@ -4,17 +4,20 @@ import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { profileHeaderSelect } from '@/types/user'
-import { postCardSelect } from '@/types/post'
+import { makePostCardSelect } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
+import { getServerSession } from '@/lib/auth/session'
 
 export const dynamic = 'force-dynamic'
 
 type ProfileParams = { username: string }
-
 type ProfilePageProps = { params: Promise<ProfileParams> }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params
+
+  const session = await getServerSession()
+  const viewerId = session?.user?.id
 
   const user = await prisma.user.findUnique({
     where: { username },
@@ -23,7 +26,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       posts: {
         orderBy: { createdAt: 'desc' },
         take: 20,
-        select: postCardSelect,
+        select: makePostCardSelect(viewerId),
       },
     },
   })
