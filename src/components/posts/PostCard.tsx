@@ -64,7 +64,9 @@ export function PostCard({ post }: PostCardProps) {
       <CardFooter className='flex items-center justify-between text-xs text-muted-foreground'>
         <div className='flex gap-4'>
           <span>{post._count.likes} likes</span>
-          <span>{post._count.comments} comments</span>
+          <Link href={`/post/${post.id}`} className='hover:underline'>
+            {post._count.comments} comments
+          </Link>
         </div>
 
         <LikeButton postId={post.id} liked={likedByMe} />
