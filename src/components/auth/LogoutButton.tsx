@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth/client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,8 @@ export function LogoutButton({
   className,
   variant = 'ghost',
   size = 'sm',
+  label = 'Sign out',
+  icon,
 }: {
   className?: string
   variant?:
@@ -19,6 +21,8 @@ export function LogoutButton({
     | 'ghost'
     | 'link'
   size?: 'default' | 'sm' | 'lg' | 'icon'
+  label?: string
+  icon?: ReactNode
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -26,6 +30,7 @@ export function LogoutButton({
 
   const handleLogout = async () => {
     setLoading(true)
+    setError(null)
     try {
       await authClient.signOut()
       router.refresh()
@@ -37,6 +42,8 @@ export function LogoutButton({
     }
   }
 
+  const text = loading ? 'Signing out…' : error ? error : label
+
   return (
     <Button
       type='button'
@@ -46,7 +53,10 @@ export function LogoutButton({
       disabled={loading}
       onClick={handleLogout}
     >
-      {loading ? 'Signing out' : error ? error : 'Sign out'}
+      {icon ? (
+        <span className='mr-2 inline-flex items-center'>{icon}</span>
+      ) : null}
+      {text}
     </Button>
   )
 }

@@ -1,12 +1,11 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import { getServerSession } from '@/lib/auth/session'
-import { Globe } from 'lucide-react'
+import { Globe, User2, Pencil, Rss, LogOut } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -36,6 +35,11 @@ export async function AppNav() {
     ? `/profile/${appUser.username}`
     : '/onboarding/username'
 
+  const primaryName =
+    appUser?.displayName ?? appUser?.username ?? appUser?.email
+  const secondaryName = appUser?.name ?? appUser?.email
+  const initials = getInitials(primaryName ?? secondaryName ?? '?')
+
   return (
     <header className='border-b'>
       <div className='mx-auto flex h-14 max-w-5xl items-center justify-between px-4'>
@@ -49,7 +53,6 @@ export async function AppNav() {
 
         <nav className='flex items-center gap-2'>
           {appUser && authUser ? (
-            // Logged in Profile Avatar
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -58,49 +61,74 @@ export async function AppNav() {
                   aria-label='Open user menu'
                 >
                   <Avatar className='h-8 w-8'>
-                    {/* use image if you have it */}
                     <AvatarImage src={appUser.image ?? undefined} />
                     <AvatarFallback className='bg-primary text-primary-foreground'>
-                      {getInitials(
-                        appUser.displayName ??
-                          appUser.username ??
-                          appUser.email,
-                      )}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align='end' className='w-64'>
-                {/* Clickable profile row */}
-                <DropdownMenuLabel className='p-0'>
-                  <DropdownMenuItem
-                    asChild
-                    className='cursor-pointer px-3 py-2'
-                  >
-                    <Link href={profileHref} className='w-full'>
-                      <div className='flex min-w-0 flex-col'>
-                        <p className='truncate text-sm font-medium leading-none'>
-                          {appUser?.displayName ??
-                            appUser.username ??
-                            appUser.email}
-                        </p>
-                        {appUser.displayName && (
-                          <p className='truncate text-xs text-muted-foreground'>
-                            {appUser.email}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuLabel>
+              <DropdownMenuContent align='end' className='w-72'>
+                {/* Unclickable summary */}
+                <div className='flex items-center gap-3 px-3 py-2'>
+                  <Avatar className='h-10 w-10 shrink-0'>
+                    <AvatarImage src={appUser.image ?? undefined} />
+                    <AvatarFallback className='bg-primary text-primary-foreground'>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className='min-w-0'>
+                    <p className='truncate text-sm font-medium leading-none'>
+                      {primaryName}
+                    </p>
+                    <p className='truncate text-xs text-muted-foreground'>
+                      {secondaryName}
+                    </p>
+                  </div>
+                </div>
 
                 <DropdownMenuSeparator />
 
-                {/* Feed as menu button */}
+                {/* View / Edit Profile */}
                 <DropdownMenuItem asChild className='cursor-pointer'>
-                  <Link href='/feed' className='w-full'>
-                    Feed
+                  <Link
+                    href={profileHref}
+                    className='flex w-full items-center gap-2'
+                  >
+                    <User2 className='h-4 w-4' />
+                    View Profile
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link
+                    href='/settings/profile'
+                    className='flex w-full items-center gap-2'
+                  >
+                    <Pencil className='h-4 w-4' />
+                    Edit Profile
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Feeds */}
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link
+                    href='/feed?tab=following'
+                    className='flex w-full items-center gap-2'
+                  >
+                    <Rss className='h-4 w-4' />
+                    My Feed
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild className='cursor-pointer'>
+                  <Link href='/feed' className='flex w-full items-center gap-2'>
+                    <Globe className='h-4 w-4' />
+                    Community Feed
                   </Link>
                 </DropdownMenuItem>
 
@@ -112,12 +140,13 @@ export async function AppNav() {
                     className='w-full justify-start rounded-none'
                     variant='ghost'
                     size='sm'
+                    label='Log out'
+                    icon={<LogOut className='h-4 w-4' />}
                   />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            // Non logged in Register/Login buttons
             <>
               <Button asChild variant='ghost' size='sm'>
                 <Link href='/login'>Sign in</Link>
