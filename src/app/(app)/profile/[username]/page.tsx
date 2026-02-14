@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { profileHeaderSelect } from '@/types/user'
+import { makeProfileHeaderSelect } from '@/types/user'
+import { FollowButton } from '@/components/profile/FollowButton'
 import { makePostCardSelect } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 import { getServerSession } from '@/lib/auth/session'
@@ -22,7 +23,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const user = await prisma.user.findUnique({
     where: { username },
     select: {
-      ...profileHeaderSelect,
+      ...makeProfileHeaderSelect(viewerId),
       posts: {
         orderBy: { createdAt: 'desc' },
         take: 20,
@@ -32,6 +33,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   })
 
   if (!user) notFound()
+
+  const isMe = viewerId === user.id
+  const isFollowing = viewerId ? user.followers.length > 0 : false
 
   const profileName = user.displayName ?? user.username ?? user.id
   const initials = getInitials(profileName)
@@ -54,10 +58,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             )}
           </div>
 
-          <Avatar className='h-12 w-12 shrink-0'>
-            <AvatarImage src={user.image ?? undefined} alt={profileName} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
+          {/* RIGHT SIDE: Avatar + Follow action */}
+          <div className='flex items-center gap-3'>
+            <Avatar className='h-12 w-12 shrink-0'>
+              <AvatarImage src={user.image ?? undefined} alt={profileName} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+
+            {/* Show follow only if viewer is logged in and not viewing self */}
+            {viewerId && !isMe ? (
+              <FollowButton targetUserId={user.id} isFollowing={isFollowing} />
+            ) : null}
+          </div>
         </div>
 
         <div className='mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground'>
