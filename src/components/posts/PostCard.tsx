@@ -5,22 +5,26 @@ import type { PostCardData } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 import { formatDate } from '@/lib/date/formatDate'
 import { LikeButton } from '@/components/posts/LikeButton'
+import { FollowButton } from '../profile/FollowButton'
 
 type PostCardProps = {
   post: PostCardData
+  viewerId?: string
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, viewerId }: PostCardProps) {
   const authorName =
     post.author.displayName ?? post.author.username ?? post.author.id
+  const initials = getInitials(authorName)
 
   const profileHref = post.author.username
     ? `/profile/${post.author.username}`
     : '/onboarding/username'
 
-  const initials = getInitials(authorName)
-
   const likedByMe = post.likes.length > 0
+
+  const isMe = viewerId ? post.author.id === viewerId : false
+  const isFollowingAuthor = viewerId ? post.author.followers.length > 0 : false
 
   return (
     <Card>
@@ -48,12 +52,22 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
 
-          <time
-            className='shrink-0 text-xs text-muted-foreground'
-            dateTime={post.createdAt.toISOString()}
-          >
-            {formatDate(post.createdAt)}
-          </time>
+          {/* right side: follow + time */}
+          <div className='flex items-center gap-2'>
+            {viewerId && !isMe && (
+              <FollowButton
+                targetUserId={post.author.id}
+                isFollowing={isFollowingAuthor}
+              />
+            )}
+
+            <time
+              className='shrink-0 text-xs text-muted-foreground'
+              dateTime={post.createdAt.toISOString()}
+            >
+              {formatDate(post.createdAt)}
+            </time>
+          </div>
         </div>
       </CardHeader>
 

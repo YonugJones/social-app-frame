@@ -30,14 +30,12 @@ export default async function FeedPage({
   })
   if (!me?.username) redirect('/onboarding/username')
 
-  const viewerId = authUser.id
-
   const where =
     activeTab === 'following'
       ? {
           author: {
             followers: {
-              some: { followerId: viewerId },
+              some: { followerId: authUser.id },
             },
           },
         }
@@ -47,7 +45,7 @@ export default async function FeedPage({
     take: 20,
     orderBy: { createdAt: 'desc' },
     where,
-    select: makePostCardSelect(viewerId),
+    select: makePostCardSelect(authUser.id),
   })
 
   return (
@@ -85,7 +83,9 @@ export default async function FeedPage({
               : 'No posts yet'}
           </div>
         ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} />)
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} viewerId={authUser.id} />
+          ))
         )}
       </div>
     </div>
