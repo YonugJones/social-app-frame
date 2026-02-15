@@ -5,7 +5,8 @@ import type { PostCardData } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
 import { formatDate } from '@/lib/date/formatDate'
 import { LikeButton } from '@/components/posts/LikeButton'
-import { FollowButton } from '../profile/FollowButton'
+import { FollowButton } from '@/components/profile/FollowButton'
+import { PostCardActions } from '@/components/posts/PostCardActions'
 
 type PostCardProps = {
   post: PostCardData
@@ -23,7 +24,7 @@ export function PostCard({ post, viewerId }: PostCardProps) {
 
   const likedByMe = post.likes.length > 0
 
-  const isMe = viewerId ? post.author.id === viewerId : false
+  const isOwner = viewerId ? post.author.id === viewerId : false
   const isFollowingAuthor = viewerId ? post.author.followers.length > 0 : false
 
   return (
@@ -52,12 +53,20 @@ export function PostCard({ post, viewerId }: PostCardProps) {
             </div>
           </div>
 
-          {/* right side: follow + time */}
+          {/* right side: follow + time + post actions */}
           <div className='flex items-center gap-2'>
-            {viewerId && !isMe && (
+            {viewerId && !isOwner && (
               <FollowButton
                 targetUserId={post.author.id}
                 isFollowing={isFollowingAuthor}
+              />
+            )}
+
+            {isOwner && (
+              <PostCardActions
+                postId={post.id}
+                initialContent={post.content}
+                path='/feed'
               />
             )}
 

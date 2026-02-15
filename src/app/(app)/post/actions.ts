@@ -1,20 +1,91 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { getServerSession } from '@/lib/auth/session'
+import { requireViewer } from '@/lib/auth/requireViewer'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { mustString } from '@/lib/text/mustString'
 
-export async function toggleLike(formData: FormData) {
-  const data = await getServerSession()
-  const authUser = data?.user
+type PostState = { ok: true } | { ok: false; error: string }
 
-  if (!authUser) redirect('/login')
+export async function createPost(
+  _prev: PostState | null,
+  formData: FormData,
+): Promise<PostState> {
+  const { authUser } = await requireViewer({ requireUsername: true })
 
-  const postId = String(formData.get('postId') ?? '')
-  const path = String(formData.get('path') ?? '/feed')
+  const content = mustString(formData.get('content')).trim()
+  if (!content) return { ok: false, error: 'Post cannot be empty.' }
+  if (content.length > 500)
+    return { ok: false, error: 'Post cannot exceed 500 characters.' }
 
-  if (!postId) return
+  await prisma.post.create({
+    data: {
+      content,
+      authorId: authUser.id,
+    },
+    select: { id: true },
+  })
+
+  revalidatePath('/feed')
+  return { ok: true }
+}
+
+export async function updatePost(formData: FormData): Promise<PostState> {
+  const { authUser } = await requireViewer({ requireUsername: true })
+
+  const postId = mustString(formData.get('postId'))
+  const content = mustString(formData.get('content')).trim()
+  const path = mustString(formData.get('path')) || '/feed'
+
+  if (!postId) return { ok: false, error: 'Missing postId.' }
+  if (content.length < 1) return { ok: false, error: 'Post cannot be empty.' }
+  if (content.length > 500)
+    return { ok: false, error: 'Post cannot exceed 500 characters.' }
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { authorId: true },
+  })
+  if (!post) return { ok: false, error: 'Post not found.' }
+  if (post.authorId !== authUser.id) return { ok: false, error: 'Not allowed.' }
+
+  await prisma.post.update({
+    where: { id: postId },
+    data: { content },
+  })
+
+  revalidatePath(path)
+  return { ok: true }
+}
+
+export async function deletePost(formData: FormData): Promise<PostState> {
+  const { authUser } = await requireViewer({ requireUsername: true })
+
+  const postId = mustString(formData.get('postId'))
+  const path = mustString(formData.get('path')) || '/feed'
+
+  if (!postId) return { ok: false, error: 'Missing postId.' }
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { authorId: true },
+  })
+  if (!post) return { ok: false, error: 'Post not found.' }
+  if (post.authorId !== authUser.id) return { ok: false, error: 'Not allowed.' }
+
+  await prisma.post.delete({ where: { id: postId } })
+
+  revalidatePath(path)
+  return { ok: true }
+}
+
+export async function toggleLike(formData: FormData): Promise<PostState> {
+  const { authUser } = await requireViewer({ requireUsername: true })
+
+  const postId = mustString(formData.get('postId'))
+  const path = mustString(formData.get('path')) || '/feed'
+
+  if (!postId) return { ok: false, error: 'Missing postId.' }
 
   const where = {
     userId_postId: {
@@ -37,4 +108,5 @@ export async function toggleLike(formData: FormData) {
   }
 
   revalidatePath(path)
+  return { ok: true }
 }

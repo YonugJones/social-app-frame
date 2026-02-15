@@ -18,9 +18,12 @@ export default async function PostPage({ params }: Props) {
   const { id } = await params
   const { authUser } = await getViewer()
 
+  const viewerId = authUser?.id
+  const path = `/post/${id}`
+
   const post = await prisma.post.findUnique({
     where: { id },
-    select: makePostCardSelect(authUser?.id),
+    select: makePostCardSelect(viewerId),
   })
   if (!post) notFound()
 
@@ -43,7 +46,7 @@ export default async function PostPage({ params }: Props) {
         </Link>
       </header>
 
-      <PostCard post={post} viewerId={authUser?.id} />
+      <PostCard post={post} viewerId={viewerId} />
 
       <Separator />
 
@@ -61,7 +64,12 @@ export default async function PostPage({ params }: Props) {
         ) : (
           <div className='space-y-3'>
             {comments.map((c) => (
-              <CommentCard key={c.id} comment={c} />
+              <CommentCard
+                key={c.id}
+                comment={c}
+                viewerId={viewerId}
+                path={path}
+              />
             ))}
           </div>
         )}

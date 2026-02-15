@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { CommentCardData } from '@/types/comment'
+import { CommentCardActions } from '@/components/comments/CommentCardActions'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials } from '@/lib/text/getInitials'
@@ -7,12 +8,16 @@ import { formatDate } from '@/lib/date/formatDate'
 
 type CommentCardProps = {
   comment: CommentCardData
+  viewerId?: string
+  path: string
 }
 
-export function CommentCard({ comment }: CommentCardProps) {
+export function CommentCard({ comment, viewerId, path }: CommentCardProps) {
   const authorName =
     comment.author.displayName ?? comment.author.username ?? comment.author.id
   const initials = getInitials(authorName)
+
+  const isOwner = viewerId && viewerId === comment.author.id
 
   return (
     <Card>
@@ -42,12 +47,22 @@ export function CommentCard({ comment }: CommentCardProps) {
             </div>
           </div>
 
-          <time
-            className='shrink-0 text-xs text-muted-foreground'
-            dateTime={comment.createdAt.toISOString()}
-          >
-            {formatDate(comment.createdAt)}
-          </time>
+          <div className='flex items-center gap-2'>
+            {isOwner && (
+              <CommentCardActions
+                commentId={comment.id}
+                initialContent={comment.content}
+                path={path}
+              />
+            )}
+
+            <time
+              className='shrink-0 text-xs text-muted-foreground'
+              dateTime={comment.createdAt.toISOString()}
+            >
+              {formatDate(comment.createdAt)}
+            </time>
+          </div>
         </div>
       </CardHeader>
 
