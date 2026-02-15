@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getServerSession } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 import { CreatePostForm } from '@/components/posts/CreatePostForm'
 import { PostCard } from '@/components/posts/PostCard'
 import { makePostCardSelect } from '@/types/post'
 import { Button } from '@/components/ui/button'
+import { getViewer } from '@/lib/auth/getViewer'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,22 +20,16 @@ export default async function FeedPage({
   const { tab } = await searchParams
   const activeTab: FeedTab = tab === 'following' ? 'following' : 'all'
 
-  const data = await getServerSession()
-  const authUser = data?.user
-  if (!authUser) redirect('/login')
-
-  const me = await prisma.user.findUnique({
-    where: { id: authUser.id },
-    select: { username: true },
-  })
-  if (!me?.username) redirect('/onboarding/username')
+  const { authUser, appUser } = await getViewer()
+  if (!authUser || !appUser) redirect('/login')
+  if (!appUser.username) redirect('/onboarding/username')
 
   const where =
     activeTab === 'following'
       ? {
           author: {
             followers: {
-              some: { followerId: authUser.id },
+              some: { followerId: appUser.id },
             },
           },
         }
@@ -45,7 +39,7 @@ export default async function FeedPage({
     take: 20,
     orderBy: { createdAt: 'desc' },
     where,
-    select: makePostCardSelect(authUser.id),
+    select: makePostCardSelect(appUser.id),
   })
 
   return (
@@ -84,7 +78,7 @@ export default async function FeedPage({
           </div>
         ) : (
           posts.map((post) => (
-            <PostCard key={post.id} post={post} viewerId={authUser.id} />
+            <PostCard key={post.id} post={post} viewerId={appUser.id} />
           ))
         )}
       </div>

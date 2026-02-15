@@ -1,24 +1,18 @@
-import prisma from '@/lib/prisma'
-import { getServerSession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { UsernameForm } from './UsernameForm'
+import { getViewer } from '@/lib/auth/getViewer'
 
 export const dynamic = 'force-dynamic'
 
 export default async function UsernameOnboardingPage() {
-  const data = await getServerSession()
-  const authUser = data?.user
+  const { authUser, appUser } = await getViewer()
+  if (!authUser || !appUser) redirect('/login')
 
-  if (!authUser) redirect('/login')
-
-  const me = await prisma.user.findUnique({
-    where: { id: authUser.id },
-    select: { username: true, displayName: true, name: true },
-  })
-
-  if (me?.username) {
-    redirect(`/profile/${me.username}`)
+  if (appUser.username) {
+    redirect(`/profile/${appUser.username}`)
   }
 
-  return <UsernameForm defaultDisplayName={me?.displayName ?? authUser.name} />
+  return (
+    <UsernameForm defaultDisplayName={appUser.displayName ?? authUser.name} />
+  )
 }

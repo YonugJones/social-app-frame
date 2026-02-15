@@ -1,13 +1,13 @@
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
-import { getServerSession } from '@/lib/auth/session'
+import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/posts/PostCard'
 import { CreateCommentForm } from '@/components/comments/CreateCommentForm'
 import { CommentCard } from '@/components/comments/CommentCard'
 import { Separator } from '@/components/ui/separator'
 import { makePostCardSelect } from '@/types/post'
 import { commentCardSelect } from '@/types/comment'
+import { getViewer } from '@/lib/auth/getViewer'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,20 +16,11 @@ type Props = { params: Promise<Params> }
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params
-
-  const data = await getServerSession()
-  const authUser = data?.user
-  if (!authUser) redirect('/login')
-
-  const me = await prisma.user.findUnique({
-    where: { id: authUser.id },
-    select: { username: true },
-  })
-  if (!me?.username) redirect('/onboarding/username')
+  const { authUser } = await getViewer()
 
   const post = await prisma.post.findUnique({
     where: { id },
-    select: makePostCardSelect(authUser.id),
+    select: makePostCardSelect(authUser?.id),
   })
   if (!post) notFound()
 
@@ -52,7 +43,7 @@ export default async function PostPage({ params }: Props) {
         </Link>
       </header>
 
-      <PostCard post={post} />
+      <PostCard post={post} viewerId={authUser?.id} />
 
       <Separator />
 

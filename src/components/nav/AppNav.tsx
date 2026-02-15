@@ -1,6 +1,4 @@
 import Link from 'next/link'
-import prisma from '@/lib/prisma'
-import { getServerSession } from '@/lib/auth/session'
 import { Globe, User2, Pencil, Rss, LogOut } from 'lucide-react'
 import {
   DropdownMenu,
@@ -13,27 +11,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { getInitials } from '@/lib/text/getInitials'
+import { getViewer } from '@/lib/auth/getViewer'
 
 export async function AppNav() {
-  const data = await getServerSession()
-  const authUser = data?.user ?? null
-
-  const appUser = authUser
-    ? await prisma.user.findUnique({
-        where: { id: authUser.id },
-        select: {
-          username: true,
-          displayName: true,
-          image: true,
-          email: true,
-          name: true,
-        },
-      })
-    : null
-
-  const profileHref = appUser?.username
-    ? `/profile/${appUser.username}`
-    : '/onboarding/username'
+  const { authUser, appUser } = await getViewer()
 
   const primaryName =
     appUser?.displayName ?? appUser?.username ?? appUser?.email
@@ -93,10 +74,7 @@ export async function AppNav() {
 
                 {/* View / Edit Profile */}
                 <DropdownMenuItem asChild className='cursor-pointer'>
-                  <Link
-                    href={profileHref}
-                    className='flex w-full items-center gap-2'
-                  >
+                  <Link href='/me' className='flex w-full items-center gap-2'>
                     <User2 className='h-4 w-4' />
                     View Profile
                   </Link>

@@ -7,7 +7,7 @@ import { makeProfileHeaderSelect } from '@/types/user'
 import { FollowButton } from '@/components/profile/FollowButton'
 import { makePostCardSelect } from '@/types/post'
 import { getInitials } from '@/lib/text/getInitials'
-import { getServerSession } from '@/lib/auth/session'
+import { getViewer } from '@/lib/auth/getViewer'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,8 +17,10 @@ type ProfilePageProps = { params: Promise<ProfileParams> }
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params
 
-  const session = await getServerSession()
-  const viewerId = session?.user?.id
+  const { authUser } = await getViewer()
+  // Later, destructure appUser as well so user can Edit Profile on their own page
+
+  const viewerId = authUser?.id
 
   const user = await prisma.user.findUnique({
     where: { username },
