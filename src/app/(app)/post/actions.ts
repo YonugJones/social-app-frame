@@ -79,13 +79,13 @@ export async function deletePost(formData: FormData): Promise<PostState> {
   return { ok: true }
 }
 
-export async function toggleLike(formData: FormData): Promise<PostState> {
+export async function toggleLike(formData: FormData): Promise<void> {
   const { authUser } = await requireViewer({ requireUsername: true })
 
   const postId = mustString(formData.get('postId'))
   const path = mustString(formData.get('path')) || '/feed'
 
-  if (!postId) return { ok: false, error: 'Missing postId.' }
+  if (!postId) return
 
   const where = {
     userId_postId: {
@@ -108,5 +108,4 @@ export async function toggleLike(formData: FormData): Promise<PostState> {
   }
 
   revalidatePath(path)
-  return { ok: true }
 }
